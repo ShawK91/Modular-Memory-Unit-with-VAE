@@ -75,7 +75,7 @@ class PT_MMU(nn.Module):
 
         # Update memory
         write_gate_out = F.sigmoid(self.w_writegate(input) + self.w_mem_writegate(memory))  # #Write gate
-        encoded_update = F.tanh(self.w_encoder(hidden_act))
+        encoded_update = F.sigmoid(self.w_encoder(hidden_act))
         if self.mem_add: memory = memory + encoded_update
         else: memory = (1 - write_gate_out) * memory + write_gate_out * encoded_update
 

@@ -34,7 +34,6 @@ class Tracker(): #Tracker
                 filename = self.foldername + self.vars_string[i] + self.project_string
                 np.savetxt(filename, np.array(var[2]), fmt='%.3f', delimiter=',')
 
-
 class Parameters:
     def __init__(self):
             #BackProp
@@ -46,7 +45,7 @@ class Parameters:
                                #2 MMU
 
             #Task Params
-            self.depth_train = 5
+            self.depth_train = 10
             self.corridors = [1, 1]
             self.output_activation = 'sigmoid'
 
@@ -60,7 +59,7 @@ class Parameters:
             else: sys.exit('Invalid choice of neural architecture')
             self.save_foldername = 'Seq_Classifier/'
 
-class Task_Seq_Classifier: #Binary Sequence Classifier
+class Task_Seq_Classifier: #Sequence Classifier
     def __init__(self, parameters):
         self.parameters = parameters
         self.save_foldername = self.parameters.save_foldername
@@ -194,7 +193,6 @@ class Task_Seq_Classifier: #Binary Sequence Classifier
             while len(all_train_x[i]) < max_len:
                 all_train_x[i].append(0)
                 all_train_y[i].append(all_train_y[i][-1])
-
 
 if __name__ == "__main__":
     parameters = Parameters()  # Create the Parameters class
