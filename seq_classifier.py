@@ -5,7 +5,8 @@ from torch.autograd import Variable
 import torch
 import random
 from torch.utils import data as util
-
+from torch.nn import Parameter
+import torch.nn as nn
 
 
 class Tracker(): #Tracker
@@ -40,22 +41,21 @@ class Parameters:
     def __init__(self):
             #BackProp
             self.total_epochs= 1000
-            self.batch_size = 10
-            self.train_size = 1000
+            self.batch_size = 100
+            self.train_size = 10000
             #Determine the nerual archiecture
             self.arch_type = 2 #1 FEEDFORWARD
                                #2 GRU-MB
                                #3 LSTM
 
-
             #Task Params
-            self.depth_train = 5
-            self.corridors = [10, 20]
+            self.depth_train = 2
+            self.corridors = [1, 1]
             self.output_activation = 'sigmoid'
 
             #Auto
             self.num_input = 1
-            self.num_hidden = 5
+            self.num_hidden = 25
             self.num_output = 1
             self.num_memory = self.num_hidden
             if self.arch_type == 1: self.arch_type = 'FF'
@@ -72,11 +72,7 @@ class Task_Seq_Classifier: #Bindary Sequence Classifier
             os.makedirs(self.save_foldername)
 
         if self.parameters.arch_type == 'GRUMB':
-            self.model = mod.PT_GRUMB(parameters.num_input, parameters.num_hidden, parameters.num_memory, parameters.num_output, output_activation=self.parameters.output_activation)
-        elif self.parameters.arch_type == 'LSTM':
-            self.model = mod.PT_LSTM(parameters.num_input, parameters.num_hidden, parameters.num_output, output_activation=self.parameters.output_activation)
-        elif self.parameters.arch_type == 'FF':
-            self.model = mod.PT_FF(parameters.num_input, parameters.num_hidden, parameters.num_output, output_activation=self.parameters.output_activation)
+            self.model = mod.PT_Net(parameters.num_input, parameters.num_hidden, parameters.num_memory, parameters.num_output)
 
 
 
@@ -129,8 +125,8 @@ class Task_Seq_Classifier: #Bindary Sequence Classifier
                     net_out = self.model.forward(net_inp)
                     target_T = Variable(targets[:,i]).unsqueeze(0)
                     loss = criterion(net_out, target_T)
-                    if relevance_mat[i]: loss.backward(retain_variables=True)
-                    epoch_loss += loss.cpu().data.numpy()[0]
+                    if relevance_mat[i]: loss.backward(retain_graph=True)
+                    epoch_loss += loss.cpu().data.numpy()
 
             optimizer.step()  # Perform the gradient updates to weights for the entire set of collected gradients
             optimizer.zero_grad()
@@ -206,7 +202,7 @@ class Task_Seq_Classifier: #Bindary Sequence Classifier
 if __name__ == "__main__":
     parameters = Parameters()  # Create the Parameters class
     tracker = Tracker(parameters, ['epoch_loss', 'train', 'valid'], '_seq_classifier.csv')
-    print('Running Backprop ', parameters.arch_type)
+    print('Running Backprop with MMU')
     sim_task = Task_Seq_Classifier(parameters)
 
     #Run Back_prop
