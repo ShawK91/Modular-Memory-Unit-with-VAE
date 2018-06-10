@@ -5,8 +5,6 @@ from torch.autograd import Variable
 import torch
 import random
 from torch.utils import data as util
-from torch.nn import Parameter
-import torch.nn as nn
 
 
 class Tracker(): #Tracker
@@ -44,12 +42,11 @@ class Parameters:
             self.batch_size = 100
             self.train_size = 10000
             #Determine the nerual archiecture
-            self.arch_type = 2 #1 FEEDFORWARD
-                               #2 GRU-MB
-                               #3 LSTM
+            self.arch_type = 2 #1 MMU-Add
+                               #2 MMU
 
             #Task Params
-            self.depth_train = 2
+            self.depth_train = 5
             self.corridors = [1, 1]
             self.output_activation = 'sigmoid'
 
@@ -58,21 +55,21 @@ class Parameters:
             self.num_hidden = 25
             self.num_output = 1
             self.num_memory = self.num_hidden
-            if self.arch_type == 1: self.arch_type = 'FF'
-            elif self.arch_type ==2: self.arch_type = 'GRUMB'
-            elif self.arch_type == 3: self.arch_type = 'LSTM'
+            if self.arch_type == 1: self.arch_type = 'MMU_Add'
+            elif self.arch_type == 2: self.arch_type = 'MMU'
             else: sys.exit('Invalid choice of neural architecture')
             self.save_foldername = 'Seq_Classifier/'
 
-class Task_Seq_Classifier: #Bindary Sequence Classifier
+class Task_Seq_Classifier: #Binary Sequence Classifier
     def __init__(self, parameters):
         self.parameters = parameters
         self.save_foldername = self.parameters.save_foldername
         if not os.path.exists(self.save_foldername):
             os.makedirs(self.save_foldername)
 
-        if self.parameters.arch_type == 'GRUMB':
-            self.model = mod.PT_Net(parameters.num_input, parameters.num_hidden, parameters.num_memory, parameters.num_output)
+        if self.parameters.arch_type == 'MMU_Add': mem_add = True
+        elif self.parameters.arch_type == 'MMU': mem_add = False
+        self.model = mod.PT_Net(parameters.num_input, parameters.num_hidden, parameters.num_memory, parameters.num_output, mem_add)
 
 
 
@@ -202,7 +199,7 @@ class Task_Seq_Classifier: #Bindary Sequence Classifier
 if __name__ == "__main__":
     parameters = Parameters()  # Create the Parameters class
     tracker = Tracker(parameters, ['epoch_loss', 'train', 'valid'], '_seq_classifier.csv')
-    print('Running Backprop with MMU')
+    print('Running Backprop with', parameters.arch_type)
     sim_task = Task_Seq_Classifier(parameters)
 
     #Run Back_prop
